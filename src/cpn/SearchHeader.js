@@ -15,13 +15,25 @@ import Animated, {
 import AntDesign from "react-native-vector-icons/AntDesign";
 import {SC_W} from "../core/helper";
 import {ToolTip} from "./ToolTip";
+import {useNavigation} from "@react-navigation/native";
 
 const SearchHeader = ({title, showMini}) => {
 
+    const nav = useNavigation()
     const showOption = useSharedValue(false)
 
+    const toUploadScreenHandle = () => {
+        nav.navigate('upload')
+    }
     const toolTipsItem = [
-        {id: 1, title: 'Thêm album mới', icon: 'copy-outline', size: '22', color: 'white'},
+        {
+            id: 1,
+            title: 'Thêm album mới',
+            icon: 'copy-outline',
+            size: '22',
+            color: 'white',
+            handle: toUploadScreenHandle
+        },
         {id: 2, title: 'Chọn', icon: 'checkmark-done-outline', size: '22', color: 'white'},
         {id: 3, title: 'Biểu tượng', icon: 'appstore-o', size: '22', color: 'white', ant: true},
         {id: 4, title: 'Danh sách', icon: 'list-outline', size: '22', color: 'white'},
@@ -125,11 +137,11 @@ const SearchHeader = ({title, showMini}) => {
                     }} activeOpacity={1}>
                         <AntDesign name={'appstore-o'} color={'#4D53FE'} size={22}/>
                     </TouchableOpacity>
-                    <ToolTip bg={'rgba(255,250,250,.3)'} isShow={showOption}>
+                    <ToolTip bg={'rgba(100,100,100,.9)'} isShow={showOption}>
                         <VStack w={'100%'} py={1} justifyContent={'center'} alignItems={'center'} borderRadius={10}>
                             {toolTipsItem.map((val, index) => {
                                 return (
-                                    <TouchableOpacity style={{width: SC_W / 2.5}} activeOpacity={.1}>
+                                    <TouchableOpacity onPress={val?.handle} style={{width: SC_W / 2.5}} activeOpacity={.1}>
                                         <HStack
                                             py={2} w={'100%'} px={3}
                                             borderBottomWidth={index === toolTipsItem.length - 1 ? 0 : index === 0 || index === toolTipsItem.length - 2 ? 6 : .2}

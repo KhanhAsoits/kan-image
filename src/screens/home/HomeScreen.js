@@ -6,8 +6,10 @@ import ListFiles from "../../cpn/ListFiles";
 import UploadFile from "../../cpn/UploadFile";
 import {useLayoutEffect} from "react";
 import ListFileModel from "../../model/ListFileModel";
+import {useNavigation} from "@react-navigation/native";
 
 const HomeScreen = ({route}) => {
+    const nav = useNavigation()
 
     useLayoutEffect(() => {
         //     check files

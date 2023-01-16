@@ -12,29 +12,31 @@ import {ActivityIndicator, Image} from 'react-native'
 import Ionicons from "react-native-vector-icons/Ionicons";
 import CachedImage from 'expo-cached-image'
 
-const ImageRender = ({file, columnsRan, isCollection}) => {
+const ImageRender = ({file, columnsRan, isCollection, nav}) => {
     const imageTapped = useSharedValue(false)
     const handleTappedEvent = useAnimatedGestureHandler({
         onStart: () => {
-            console.log('tap')
             imageTapped.value = true
+        },
+        onFinish:()=>{
+            imageTapped.value = false
         },
         onEnd: () => {
             imageTapped.value = false
         }
     })
-
     const imageTappedStyles = useAnimatedStyle(() => {
         return {
             transform: [{scale: withTiming(imageTapped.value ? 1.2 : 1)}]
         }
     })
-
     return (
         <Box zIndex={1} style={{borderRadius: 12, overflow: 'hidden'}}
-             flex={1 / ((columnsRan || 3) + .2)} my={2}>
+             flex={1 / ((columnsRan || 3))} mx={1} my={2}>
             {isCollection ?
-                <TouchableOpacity style={{position: 'relative'}} activeOpacity={.9}>
+                <TouchableOpacity onPress={() => {
+                    nav.navigate('collection-detail', {collectionId: file.id})
+                }} style={{position: 'relative'}} activeOpacity={.9}>
                     <Box style={{
                         top: 9,
                         position: 'absolute',
@@ -62,15 +64,15 @@ const ImageRender = ({file, columnsRan, isCollection}) => {
                             </Box>
                         )}
                         resizeMode={'cover'} source={{uri: file.firstImage}} alt={'images'} style={{
-                        width: '100%', height: Math.round(Math.random() * (200 - 160) + 160),
+                        width: '100%', height: 180,
                         backgroundColor: 'rgba(255,255,255,.6)',
                         borderRadius: 12
                     }}/>
                 </TouchableOpacity>
                 :
                 <TapGestureHandler onGestureEvent={handleTappedEvent}>
-                    <Animated.Image source={{uri: faker.image.image()}} alt={'images'} style={[imageTappedStyles, {
-                        width: '100%', height: Math.round(Math.random() * (200 - 120) + 120),
+                    <Animated.Image source={{uri: file.uri}} alt={'images'} style={[imageTappedStyles, {
+                        width: '100%', height: 180,
                         backgroundColor: 'rgba(255,255,255,.8)',
                         borderRadius: 12
                     }]}/>

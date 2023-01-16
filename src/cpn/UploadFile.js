@@ -10,7 +10,7 @@ import {useSharedValue} from "react-native-reanimated";
 import {ImagePickerCustom} from "./ImagePickerCustom";
 import {Uploading} from "./Uploading";
 
-const UploadFile = () => {
+const UploadFile = ({goBack = false, nav}) => {
     const isOpen = useSharedValue(false)
     const [assets, setAssets] = useState([])
     const pickImage = () => {
@@ -33,7 +33,7 @@ const UploadFile = () => {
             <ImagePickerCustom setAssets={setAssets} isOpen={isOpen}/>
             {assets.length > 0 && isOpen.value === false
                 &&
-                <Uploading assets={assets}/>
+                <Uploading goBack={goBack} nav={nav} assets={assets}/>
             }
         </Center>
     )

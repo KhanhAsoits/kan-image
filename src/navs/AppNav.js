@@ -5,6 +5,8 @@ import HomeScreen from "../screens/home/HomeScreen";
 import AuthModel from "../model/AuthModel";
 import AuthScreen from "../screens/auth/AuthScreen";
 import SignInScreen from "../screens/auth/SignInScreen";
+import UploadScreen from "../screens/upload/UploadScreen";
+import CollectionDetailScreen from "../screens/collection/CollectionDetailScreen";
 
 const AppNav = () => {
     const Stack = createNativeStackNavigator()
@@ -12,8 +14,16 @@ const AppNav = () => {
         <NavigationContainer>
             <Stack.Navigator>
                 {AuthModel.isLogin ?
-                    <Stack.Screen options={{headerShown: false, gestureEnabled: false}} name={'home_screen'}
-                                  component={HomeScreen}/>
+                    <Stack.Group>
+                        <Stack.Screen options={{headerShown: false, gestureEnabled: false}} name={'home_screen'}
+                                      component={HomeScreen}/>
+                        <Stack.Screen name={'upload'} options={{headerShown: false, gestureEnabled: true}}
+                                      component={UploadScreen}
+                        />
+                        <Stack.Screen name={'collection-detail'} options={{headerShown: false}}
+                                      component={CollectionDetailScreen}
+                        ></Stack.Screen>
+                    </Stack.Group>
                     :
                     <Stack.Group>
                         <Stack.Screen name={'auth_screen'} options={{headerShown: false, gestureEnabled: false}}

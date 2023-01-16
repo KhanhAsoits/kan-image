@@ -12,7 +12,7 @@ import 'react-native-get-random-values'
 import {v4 as UUID} from 'uuid'
 import AuthModel from "../model/AuthModel";
 
-export const Uploading = ({assets}) => {
+export const Uploading = ({assets, goBack = false, nav}) => {
     const [progress, setProgress] = useState([])
     const [currentUploading, setCurrentUploading] = useState({
         transferred: 0,
@@ -22,7 +22,6 @@ export const Uploading = ({assets}) => {
     })
     const uploading = useSharedValue(.3)
     const [downloading, setDownloading] = useState(false)
-
 
     const uploadingStyle = useAnimatedStyle(() => {
         return {
@@ -91,12 +90,15 @@ export const Uploading = ({assets}) => {
                                     const downloadUrl = await uploadTask.snapshot.ref.getDownloadURL()
                                     //     upload to firebase
                                     if (i === 0) {
-                                        console.log('here')
                                         collection.firstImage = downloadUrl
                                         await ListFileModel.addCollection(collection)
                                     }
                                     if (i === blobs.length - 1) {
+
                                         await ListFileModel.getAllFile()
+                                        if (goBack) {
+                                            nav.goBack()
+                                        }
                                     }
                                     const image = new Image(UUID(), collection.id, downloadUrl, filename, blobs[i]._data.size, new Date().getTime())
                                     await ListFileModel.addImageToCollection(image)

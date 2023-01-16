@@ -5,13 +5,15 @@ import ImageRender from "./ImageRender";
 import SearchHeader from "./SearchHeader";
 import {useSharedValue} from "react-native-reanimated";
 import ListFileModel from "../model/ListFileModel";
+import {useNavigation} from "@react-navigation/native";
 
 const ListFiles = ({isCollection}) => {
     const showMiniHeader = useSharedValue(false)
     const columnsRan = 3
 
+    const nav = useNavigation()
     const renderFile = ({item: file, index}) => {
-        return <ImageRender isCollection={isCollection} file={file} columnsRan={columnsRan}/>
+        return <ImageRender isCollection={isCollection} nav={nav} file={file} columnsRan={columnsRan}/>
     }
     const renderFilesMemo = useMemo(() => renderFile, [ListFileModel.files])
 
@@ -31,11 +33,7 @@ const ListFiles = ({isCollection}) => {
                     }
                 }}
                 ListHeaderComponentStyle={{marginVertical: 12}}
-                numColumns={columnsRan || 3}
-                columnWrapperStyle={{
-                    flex: 1,
-                    justifyContent: 'space-between'
-                }}
+                numColumns={3}
                 data={ListFileModel.files}
                 renderItem={renderFilesMemo}
                 keyExtractor={item => item?.id}
