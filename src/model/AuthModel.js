@@ -2,6 +2,7 @@ import {makeAutoObservable} from "mobx";
 import {User} from "../core/types";
 import FirebaseModel from './FirebaseProcessor'
 import {Alert} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 class AuthModel {
 
@@ -29,6 +30,18 @@ class AuthModel {
 
     setUser = (value) => {
         this.user = value
+    }
+    onLogout = async ()=>{
+        try{
+            this.setFetching(true)
+            setTimeout(async()=>{
+                this.setUser(null)
+                await AsyncStorage.removeItem('@auth_email')
+                this.setFetching(false)
+            },300)
+        }catch(e){
+            console.log(e)
+        }
     }
     onLogin = async (email, autoLogin = false) => {
         try {

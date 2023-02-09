@@ -13,7 +13,8 @@ export const ToolTip = (props) => {
 
     return (
         <Animated.View
-            style={[showStyles, {
+            ref={props.c_ref}
+            style={[showStyles,props.c_style ? {...props.c_style} : {
                 width: SC_W / 2.5,
                 position: 'absolute',
                 zIndex: 50,

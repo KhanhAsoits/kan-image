@@ -22,6 +22,7 @@ export const ImagePickerCustom = ({setAssets, isOpen}) => {
                     check: PickerCheck
                 }}
                 onSave={(assets) => {
+                    console.log(assets)
                     setAssets(assets)
                     isOpen.value = false
                 }}

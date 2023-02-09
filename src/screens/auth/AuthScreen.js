@@ -10,31 +10,7 @@ import AuthModel from "../../model/AuthModel";
 
 const AuthScreen = ({route}) => {
     // auto login
-    useLayoutEffect(() => {
-        const sync = async () => {
-            const email = await AsyncStorage.getItem("@auth_email")
-            if (email !== null && email !== "") {
-                //     auto login
-                console.log('Auto login with email : ', email)
-                await AuthModel.onLogin(email, true)
-            }
-        }
-        sync()
-    }, [])
-
-    useLayoutEffect(() => {
-        if (AuthModel.user.email && AuthModel.user.email !== "") {
-            const async = async () => {
-                const email = await AsyncStorage.getItem("@auth_email")
-                if (email === null || email === "") {
-                    await AsyncStorage.setItem("@auth_email", AuthModel.user.email)
-                }
-                console.log('User : ', AuthModel.user)
-                await AuthModel.setIsLogin(true)
-            }
-            async()
-        }
-    }, [AuthModel.user])
+   
     const nav = useNavigation()
     return (
         <SafeAreaView style={{flex: 1}}>

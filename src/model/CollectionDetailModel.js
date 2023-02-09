@@ -7,9 +7,20 @@ class CollectionDetailModel {
     fetching = false
     listImage = []
     collection = {}
+    indexShow = 0
 
+    listImageSelected = []
     constructor() {
         makeAutoObservable(this)
+    }
+
+
+
+    setListImageSelected = (val)=>{
+        this.listImageSelected = val;
+    }
+    setIndexShow = (val)=>{
+        this.indexShow = val
     }
 
     setFetching = (val) => {
@@ -20,6 +31,15 @@ class CollectionDetailModel {
     }
     setCollection = (val) => {
         this.collection = val
+    }
+
+    onGetAllImageUriByCollection = async (id)=> {
+        try{
+            let result = await FirebaseProcessor.getDocsByQuery('images',new Query('collectionId','==',id))
+            return result.length > 0 ? result : null
+        }catch(e){
+            console.log(e)
+        }
     }
 
     onGetCollection = async (id) => {
@@ -36,14 +56,12 @@ class CollectionDetailModel {
     onGetImageByCollection = async (id) => {
         try {
             this.setFetching(true)
-            setTimeout(async () => {
                 await this.onGetCollection(id)
                 const result = await FirebaseProcessor.getDocsByQuery('images', new Query('collectionId', '==', id))
                 if (result.length > 0) {
                     this.setListImage(result)
                 }
                 this.setFetching(false)
-            }, 500)
         } catch (e) {
             console.log(e)
         }

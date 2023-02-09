@@ -16,8 +16,12 @@ import AntDesign from "react-native-vector-icons/AntDesign";
 import {SC_W} from "../core/helper";
 import {ToolTip} from "./ToolTip";
 import {useNavigation} from "@react-navigation/native";
+import downloadManagerModel from "../model/DownloadManagerModel";
+import listFileModel from "../model/ListFileModel";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import authModel from "../model/AuthModel";
 
-const SearchHeader = ({title, showMini}) => {
+const SearchHeader = ({title, showMini,layoutConfig}) => {
 
     const nav = useNavigation()
     const showOption = useSharedValue(false)
@@ -25,6 +29,15 @@ const SearchHeader = ({title, showMini}) => {
     const toUploadScreenHandle = () => {
         nav.navigate('upload')
     }
+    const handleChangeLayoutMode = (mode)=>{
+        if(mode!==listFileModel.layoutConfig){
+            listFileModel.setLayoutConfig(mode)
+        }
+    }
+    const handleSelectAbleFile = ()=>{
+        listFileModel.setSelectAble(!listFileModel.selectAble)
+    }
+   
     const toolTipsItem = [
         {
             id: 1,
@@ -34,13 +47,18 @@ const SearchHeader = ({title, showMini}) => {
             color: 'white',
             handle: toUploadScreenHandle
         },
-        {id: 2, title: 'Chọn', icon: 'checkmark-done-outline', size: '22', color: 'white'},
-        {id: 3, title: 'Biểu tượng', icon: 'appstore-o', size: '22', color: 'white', ant: true},
-        {id: 4, title: 'Danh sách', icon: 'list-outline', size: '22', color: 'white'},
+        
+        
+        {id: 2, title: 'Chọn', select:true,icon: 'checkmark-done-outline', size: '22', color: 'white',handle:handleSelectAbleFile},
+        {id: 3, title: 'Biểu tượng',layout:2, icon: 'appstore-o', size: '22', color: 'white', ant: true,handle:handleChangeLayoutMode},
+        {id: 4, title: 'Danh sách', layout:1,icon: 'list-outline', size: '22', color: 'white',handle:handleChangeLayoutMode},
         {id: 5, title: 'Sắp xếp', icon: 'funnel-outline', size: '22', color: 'white'},
-        {id: 6, title: 'Tải về', icon: 'arrow-down-circle-outline', size: '22', color: 'white'},
+        {id: 6, title: 'Chia sẻ với tôi', icon: 'share-outline', size: '22',download:true, color: 'white',handle:()=>{nav.navigate('shared')}},
+        {id: 7, title: 'Thông báo', icon: 'notifications-outline', size: '22',download:true, color: 'white',handle:()=>{nav.navigate('download')}},
+        {id: 8, title: 'Quét mã', icon: 'scan', size: '22', color: 'white',handle:()=>{nav.navigate('scanner')}},
+        {id: 9, title: 'Đăng xuất', icon: 'log-out-outline', size: '22', color: 'red',handle:authModel.onLogout},
+        
     ]
-
     const handleClearQuery = () => {
         HeaderSearchModel.setQuery('')
     }
@@ -127,33 +145,47 @@ const SearchHeader = ({title, showMini}) => {
                         width: '90%'
                     }]}>{title}</Animated.Text>
                 <Animated.View style={[optionBtnStyle, {
-                    justifyContent: 'center',
+                    justifyContent: 'flex-start',
                     flexDirection: 'row',
-                    alignItems: 'center'
+                    alignItems: 'center',
                 }]}>
                     <TouchableOpacity onPress={() => {
                         showOption.value = !showOption.value
-                        console.log(showOption.value)
                     }} activeOpacity={1}>
+                        {downloadManagerModel.downloadTask.length > 0 &&  
+                        <Box position={'absolute'} w={3} h={3} bgColor={'red.500'} right={-3} top={-3} zIndex={100} borderRadius={100}></Box>
+                        }
                         <AntDesign name={'appstore-o'} color={'#4D53FE'} size={22}/>
                     </TouchableOpacity>
                     <ToolTip bg={'rgba(100,100,100,.9)'} isShow={showOption}>
                         <VStack w={'100%'} py={1} justifyContent={'center'} alignItems={'center'} borderRadius={10}>
                             {toolTipsItem.map((val, index) => {
                                 return (
-                                    <TouchableOpacity onPress={val?.handle} style={{width: SC_W / 2.5}} activeOpacity={.1}>
-                                        <HStack
-                                            py={2} w={'100%'} px={3}
-                                            borderBottomWidth={index === toolTipsItem.length - 1 ? 0 : index === 0 || index === toolTipsItem.length - 2 ? 6 : .2}
-                                            borderBottomColor={index === 0 || index === toolTipsItem.length - 2 ? 'black' : 'white'}
-                                            alignItems={'center'}
-                                            justifyContent={'flex-start'} space={3}>
-                                            {val?.ant ?
-                                                <AntDesign name={val.icon} color={'white'} size={22}/>
-                                                :
-                                                <Ionicons name={val.icon} size={22} color={'white'}/>
+                                    <TouchableOpacity key={val.id.toString()} onPress={val?.layout ? ()=>{
+                                        val.handle(val.layout)
+                                    } : val?.handle} style={{width: SC_W / 2.5}} activeOpacity={.1}>
+                                        <HStack  w={'100%'} justifyContent={'space-between'} alignItems={'center'}>
+                                            <HStack
+                                                py={2} px={3}
+                                                borderBottomWidth={index === toolTipsItem.length - 1 ? 0 : index === 0 || index === toolTipsItem.length - 2 ? 6 : .2}
+                                                borderBottomColor={index === 0 || index === toolTipsItem.length - 2 ? 'black' : (val?.select && listFileModel.selectAble) ? '#77b6ff' :  'white'}
+                                                alignItems={'center'}
+                                                w={'100%'}
+                                                justifyContent={'flex-start'} space={3}>
+                                                {val?.ant ?
+                                                    <AntDesign name={val.icon} color={val.select && listFileModel.selectAble ? '#77b6ff' : 'white'} size={22}/>
+                                                    :
+                                                    <Ionicons name={val.icon} size={22} color={val?.select && listFileModel.selectAble ? '#77b6ff' : 'white'}/>
+                                                }
+                                                <Text color={val.select && listFileModel.selectAble ? '#77b6ff' : 'white'}>{val.title}</Text>
+                                                {/* { &&  <Ionicons name={'checkmark-outline'} color={'white'} size={22}/>} */}
+                                                {val?.layout && listFileModel.layoutConfig === val.layout && <Ionicons name={'checkmark-outline'} color={'white'} size={22}/>}
+                                            </HStack>
+                                            {val?.download  && downloadManagerModel.downloadTask.length > 0 &&
+                                            <Box w={6} mr={2} h={6} justifyContent={'center'} alignItems={'center'} bgColor={'red.400'} borderRadius={100}>
+                                                <Text textAlign={'center'} color={'white'}>{downloadManagerModel.downloadTask.length}</Text>
+                                            </Box>
                                             }
-                                            <Text color={'white'}>{val.title}</Text>
                                         </HStack>
                                     </TouchableOpacity>
                                 )

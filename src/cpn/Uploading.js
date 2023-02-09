@@ -11,6 +11,8 @@ import {Image, Rule, ThumbnailCollection} from '../core/types'
 import 'react-native-get-random-values'
 import {v4 as UUID} from 'uuid'
 import AuthModel from "../model/AuthModel";
+import { Alert } from "react-native";
+import listFileModel from "../model/ListFileModel";
 
 export const Uploading = ({assets, goBack = false, nav}) => {
     const [progress, setProgress] = useState([])
@@ -38,13 +40,14 @@ export const Uploading = ({assets, goBack = false, nav}) => {
                 progress: currentProgress,
                 transferred: currentTransferred,
                 height: height
-            })
+            })  
         }
     }, [progress])
     // uploading
     useLayoutEffect(() => {
         const sync = async () => {
             const storage = firebase.storage(firebaseApp).ref()
+           
             //     fetch
             setDownloading(true)
             setTimeout(async () => {
@@ -61,14 +64,19 @@ export const Uploading = ({assets, goBack = false, nav}) => {
                     setDownloading(false)
                 }, 500)
                 // upload
-
-                const uploadFolder = 'uploaded'
                 const totalTransfer = blobs.reduce((cur, next) => cur + next._data.size, 0)
+                console.log(totalTransfer)
+                console.log(50 * 1000000)
+                if(totalTransfer > 50 * 1000000){
+                    Alert.alert('Thông báo','Hiện ứng dụng chỉ cho phép tải nên 50 mb / lần.')
+                    nav.goBack()
+                }
+                const uploadFolder = 'uploaded'
                 setCurrentUploading({...currentUploading, total: totalTransfer})
                 const collection = new ThumbnailCollection(UUID(), AuthModel.user.id, blobs.length, "", [], {
                     read: true,
                     write: false
-                })
+                },new Date().getTime(),true,totalTransfer,UUID())
                 const syncUpload = async (collection, blobs) => {
                     if (blobs.length > 0) {
                         for (let i = 0; i < blobs.length; i++) {
@@ -88,20 +96,19 @@ export const Uploading = ({assets, goBack = false, nav}) => {
                                 },
                                 async () => {
                                     const downloadUrl = await uploadTask.snapshot.ref.getDownloadURL()
+                                    const image = new Image(UUID(), collection.id, downloadUrl, filename, blobs[i]._data.size, new Date().getTime(),assets[i].width,assets[i].height,'','',true)
+                                    await ListFileModel.addImageToCollection(image)
                                     //     upload to firebase
                                     if (i === 0) {
                                         collection.firstImage = downloadUrl
                                         await ListFileModel.addCollection(collection)
                                     }
-                                    if (i === blobs.length - 1) {
-
-                                        await ListFileModel.getAllFile()
-                                        if (goBack) {
+                                    if(i === blobs.length - 1){
+                                        await listFileModel.getAllFile()
+                                        if(goBack){
                                             nav.goBack()
                                         }
                                     }
-                                    const image = new Image(UUID(), collection.id, downloadUrl, filename, blobs[i]._data.size, new Date().getTime())
-                                    await ListFileModel.addImageToCollection(image)
                                 }
                             )
                         }
